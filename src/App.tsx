@@ -1,4 +1,9 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
+import profilePhoto from "./assets/images/mariema-profile.jpg";
+import protectaImg from "./assets/images/protecta.jpg";
+import remaflowImg from "./assets/images/remaflow.jpg";
+import jojDakarImg from "./assets/images/joj-dakar.jpg";
+import jigeenBusinessImg from "./assets/images/jigeen-business.jpg";
 
 /* ─── Icons (inline SVG helpers) ─── */
 function Icon({ path, size = 20, className = "" }: { path: string; size?: number; className?: string }) {
@@ -216,7 +221,7 @@ function Hero() {
             {/* Photo container */}
             <div style={{ width: "100%", height: "100%", borderRadius: "60% 40% 60% 40%", overflow: "hidden", boxShadow: "0 24px 64px rgba(91,58,140,0.2)", background: "linear-gradient(145deg, #f8eff8 0%, #ecdcf0 50%, #cdb4db 100%)" }}>
               <img
-                src="/photo/ODC-Shoot-P8-2026 16.jpg"
+                src={profilePhoto}
                 alt="Mariema Diop — Référente Digitale"
                 style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
                 onError={(e) => {
@@ -437,7 +442,7 @@ function Projects() {
       description: "Solution digitale sénégalaise de prévention, d'alerte et d'assistance destinée aux femmes, aux jeunes filles et aux enfants. Combine application mobile, dispositifs connectés discrets et IA pour faciliter l'envoi d'alertes.",
       role: ["Recherche UX", "UX/UI Design", "Maquettes Figma", "Prototypage"],
       tools: ["Figma", "Design Thinking", "UX/UI"],
-      img: "/assets/images/protecta.jpg",
+      img: protectaImg,
       color: "#5B3A8C",
     },
     {
@@ -447,7 +452,7 @@ function Projects() {
       description: "Projet de marque e-commerce dédié à la vente de chaussures, vêtements et accessoires. Identité visuelle moderne et expérience digitale élégante.",
       role: ["Identité visuelle", "Design d'interface", "Maquettes", "Prototypage"],
       tools: ["Figma", "Branding", "UI Design"],
-      img: "/assets/images/remaflow.jpg",
+      img: remaflowImg,
       color: "#7B5AB0",
     },
     {
@@ -457,7 +462,7 @@ function Projects() {
       description: "Expérience digitale autour des Jeux Olympiques de la Jeunesse Dakar 2026. Parcours utilisateurs, wireframes et maquettes pour faciliter l'accès aux informations de l'événement.",
       role: ["Landing Page", "Inscription", "Calendrier", "Profil utilisateur", "Galerie"],
       tools: ["Figma", "UX/UI Design", "Wireframing"],
-      img: "/assets/images/joj-dakar.jpg",
+      img: jojDakarImg,
       color: "#9B6BC0",
     },
     {
@@ -467,7 +472,7 @@ function Projects() {
       description: "Plateforme d'accompagnement des femmes entrepreneures pour valoriser leurs produits, renforcer leur visibilité et créer de nouvelles opportunités.",
       role: ["Concept", "Structuration", "Expérience utilisateur", "Conception d'interfaces"],
       tools: ["Figma", "UX/UI", "Business Model"],
-      img: "/assets/images/jigeen-business.jpg",
+      img: jigeenBusinessImg,
       color: "#5B3A8C",
     },
   ];
