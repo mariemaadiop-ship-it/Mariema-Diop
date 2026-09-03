@@ -437,7 +437,7 @@ function Projects() {
       description: "Solution digitale sénégalaise de prévention, d'alerte et d'assistance destinée aux femmes, aux jeunes filles et aux enfants. Combine application mobile, dispositifs connectés discrets et IA pour faciliter l'envoi d'alertes.",
       role: ["Recherche UX", "UX/UI Design", "Maquettes Figma", "Prototypage"],
       tools: ["Figma", "Design Thinking", "UX/UI"],
-      img: "assets/images/protecta.jpg",
+      img: "/assets/images/protecta.jpg",
       color: "#5B3A8C",
     },
     {
@@ -447,7 +447,7 @@ function Projects() {
       description: "Projet de marque e-commerce dédié à la vente de chaussures, vêtements et accessoires. Identité visuelle moderne et expérience digitale élégante.",
       role: ["Identité visuelle", "Design d'interface", "Maquettes", "Prototypage"],
       tools: ["Figma", "Branding", "UI Design"],
-      img: "assets/images/remaflow.jpg",
+      img: "/assets/images/remaflow.jpg",
       color: "#7B5AB0",
     },
     {
@@ -457,7 +457,7 @@ function Projects() {
       description: "Expérience digitale autour des Jeux Olympiques de la Jeunesse Dakar 2026. Parcours utilisateurs, wireframes et maquettes pour faciliter l'accès aux informations de l'événement.",
       role: ["Landing Page", "Inscription", "Calendrier", "Profil utilisateur", "Galerie"],
       tools: ["Figma", "UX/UI Design", "Wireframing"],
-      img: "assets/images/joj-dakar.jpg",
+      img: "/assets/images/joj-dakar.jpg",
       color: "#9B6BC0",
     },
     {
@@ -467,7 +467,7 @@ function Projects() {
       description: "Plateforme d'accompagnement des femmes entrepreneures pour valoriser leurs produits, renforcer leur visibilité et créer de nouvelles opportunités.",
       role: ["Concept", "Structuration", "Expérience utilisateur", "Conception d'interfaces"],
       tools: ["Figma", "UX/UI", "Business Model"],
-      img: "assets/images/jigeen-business.jpg",
+      img: "/assets/images/jigeen-business.jpg",
       color: "#5B3A8C",
     },
   ];
