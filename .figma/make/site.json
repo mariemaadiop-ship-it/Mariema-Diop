@@ -1,0 +1,10 @@
+{
+  "description": "Showcases a professional digital portfolio highlighting skills, projects, and experience in graphic design and UX/UI for career growth and networking.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
