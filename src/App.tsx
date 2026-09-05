@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import profilePhoto from "./assets/images/mariema-profile.jpg";
 import protectaImg from "./assets/images/protecta.jpg";
 import remaflowImg from "./assets/images/remaflow.jpg";
@@ -8,7 +8,18 @@ import jigeenBusinessImg from "./assets/images/jigeen-business.jpg";
 /* ─── Icons (inline SVG helpers) ─── */
 function Icon({ path, size = 20, className = "" }: { path: string; size?: number; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
       <path d={path} />
     </svg>
   );
@@ -39,8 +50,14 @@ function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll(".reveal");
     const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) { (e.target as HTMLElement).classList.add("visible"); } }),
-      { threshold: 0.12 }
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            (e.target as HTMLElement).classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
     );
     els.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
@@ -53,11 +70,16 @@ function useActiveSection(ids: string[]) {
   useEffect(() => {
     const obs = new IntersectionObserver(
       (entries) => {
-        entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); });
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
+        });
       },
-      { threshold: 0.35 }
+      { threshold: 0.25 }
     );
-    ids.forEach((id) => { const el = document.getElementById(id); if (el) obs.observe(el); });
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) obs.observe(el);
+    });
     return () => obs.disconnect();
   }, [ids]);
   return active;
@@ -71,9 +93,17 @@ function Navbar({ active }: { active: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", handler);
+    const handler = () => setScrolled(window.scrollY > 30);
+    window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const links = [
@@ -95,70 +125,161 @@ function Navbar({ active }: { active: string }) {
     <header
       role="banner"
       style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 900,
-        background: scrolled ? "rgba(255,255,255,0.95)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(205,180,219,0.3)" : "1px solid transparent",
-        transition: "all 0.4s cubic-bezier(0.4,0,0.2,1)",
-        boxShadow: scrolled ? "0 2px 20px rgba(91,58,140,0.08)" : "none",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 900,
+        background: scrolled || menuOpen ? "rgba(255,255,255,0.96)" : "transparent",
+        backdropFilter: scrolled || menuOpen ? "blur(14px)" : "none",
+        borderBottom: scrolled || menuOpen ? "1px solid rgba(205,180,219,0.3)" : "1px solid transparent",
+        transition: "all 0.35s cubic-bezier(0.4,0,0.2,1)",
+        boxShadow: scrolled ? "0 4px 20px rgba(91,58,140,0.06)" : "none",
       }}
     >
-      <nav style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 70 }} aria-label="Navigation principale">
-        {/* Logo */}
-        <button onClick={() => scrollTo("accueil")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 10 }} aria-label="Retour en haut">
-          <div style={{ width: 38, height: 38, background: "var(--color-violet)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ color: "white", fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "0.9rem" }}>MD</span>
-          </div>
-          <span style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.1rem", color: "var(--color-violet)" }}>Mariema Diop</span>
-        </button>
-
-        {/* Desktop links */}
-        <div style={{ display: "flex", alignItems: "center", gap: 32 }} className="hidden-mobile">
-          {links.map((l) => (
-            <button key={l.id} onClick={() => scrollTo(l.id)} className={`nav-link ${active === l.id ? "active" : ""}`} style={{ background: "none", border: "none", cursor: "pointer" }}>
-              {l.label}
-            </button>
-          ))}
-          <button onClick={() => scrollTo("contact")} className="btn-primary" style={{ padding: "10px 22px", fontSize: "0.85rem" }}>
-            Me contacter
-          </button>
-        </div>
-
-        {/* Hamburger */}
-        <button
-          className={`hamburger ${menuOpen ? "open" : ""}`}
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-          aria-expanded={menuOpen}
-          style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6, padding: 4 }}
+      <div className="section-container" style={{ padding: "0 clamp(16px, 3vw, 32px)" }}>
+        <nav
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: "clamp(60px, 8vh, 72px)",
+          }}
+          aria-label="Navigation principale"
         >
-          <span /><span /><span />
-        </button>
-      </nav>
+          {/* Logo */}
+          <button
+            onClick={() => scrollTo("accueil")}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "6px 0",
+            }}
+            aria-label="Mariema Diop — Retour à l'accueil"
+          >
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                background: "var(--color-violet)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <span style={{ color: "white", fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "0.85rem" }}>
+                MD
+              </span>
+            </div>
+            <span
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontWeight: 700,
+                fontSize: "clamp(1rem, 2vw, 1.15rem)",
+                color: "var(--color-violet)",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Mariema Diop
+            </span>
+          </button>
 
-      {/* Mobile menu */}
+          {/* Desktop links */}
+          <div className="nav-desktop">
+            {links.map((l) => (
+              <button
+                key={l.id}
+                onClick={() => scrollTo(l.id)}
+                className={`nav-link ${active === l.id ? "active" : ""}`}
+                style={{ background: "none", border: "none", cursor: "pointer" }}
+              >
+                {l.label}
+              </button>
+            ))}
+            <button
+              onClick={() => scrollTo("contact")}
+              className="btn-primary"
+              style={{ padding: "9px 20px", minHeight: 40, fontSize: "0.85rem" }}
+            >
+              Me contacter
+            </button>
+          </div>
+
+          {/* Mobile / Tablet Hamburger */}
+          <button
+            className={`hamburger nav-hamburger-btn ${menuOpen ? "open" : ""}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={menuOpen ? "Fermer le menu de navigation" : "Ouvrir le menu de navigation"}
+            aria-expanded={menuOpen}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </nav>
+      </div>
+
+      {/* Mobile menu drawer */}
       <div
         style={{
-          maxHeight: menuOpen ? 600 : 0,
-          overflow: "hidden",
-          transition: "max-height 0.4s cubic-bezier(0.4,0,0.2,1)",
-          background: "rgba(255,255,255,0.97)",
-          backdropFilter: "blur(12px)",
+          maxHeight: menuOpen ? "85vh" : 0,
+          opacity: menuOpen ? 1 : 0,
+          overflowY: "auto",
+          transition: "max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease",
+          background: "rgba(255,255,255,0.98)",
+          backdropFilter: "blur(16px)",
+          borderTop: menuOpen ? "1px solid rgba(205,180,219,0.25)" : "none",
         }}
       >
-        <div style={{ padding: "16px 24px 24px", display: "flex", flexDirection: "column", gap: 4 }}>
+        <div
+          className="section-container"
+          style={{
+            padding: "16px clamp(16px, 4vw, 32px) 24px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+          }}
+        >
           {links.map((l) => (
-            <button key={l.id} onClick={() => scrollTo(l.id)} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left", padding: "12px 0", fontFamily: "var(--font-heading)", fontWeight: 500, fontSize: "1rem", color: active === l.id ? "var(--color-violet)" : "var(--color-ink)", borderBottom: "1px solid rgba(205,180,219,0.2)" }}>
-              {l.label}
+            <button
+              key={l.id}
+              onClick={() => scrollTo(l.id)}
+              style={{
+                background: active === l.id ? "rgba(91,58,140,0.08)" : "transparent",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                textAlign: "left",
+                padding: "12px 16px",
+                fontFamily: "var(--font-heading)",
+                fontWeight: 600,
+                fontSize: "0.98rem",
+                color: active === l.id ? "var(--color-violet)" : "var(--color-ink)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                transition: "all 0.2s ease",
+              }}
+            >
+              <span>{l.label}</span>
+              {active === l.id && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--color-violet)" }} />}
             </button>
           ))}
-          <button onClick={() => scrollTo("contact")} className="btn-primary" style={{ marginTop: 12, justifyContent: "center" }}>
+          <button
+            onClick={() => scrollTo("contact")}
+            className="btn-primary"
+            style={{ marginTop: 12, width: "100%", justifyContent: "center" }}
+          >
             Me contacter
           </button>
         </div>
       </div>
-
-      <style>{`.hidden-mobile { display: flex !important; } .hamburger { display: none !important; } @media (max-width: 768px) { .hidden-mobile { display: none !important; } .hamburger { display: flex !important; } }`}</style>
     </header>
   );
 }
@@ -172,81 +293,222 @@ function Hero() {
       id="accueil"
       aria-label="Accueil"
       style={{
-        minHeight: "100vh",
+        minHeight: "100svh",
         background: "linear-gradient(135deg, #fdf6ff 0%, var(--color-blush) 40%, #f3eafe 100%)",
         display: "flex",
         alignItems: "center",
-        paddingTop: 80,
+        paddingTop: "clamp(80px, 12vh, 110px)",
+        paddingBottom: "clamp(48px, 8vh, 80px)",
         position: "relative",
         overflow: "hidden",
       }}
     >
-      {/* Decorative blobs */}
-      <div aria-hidden="true" style={{ position: "absolute", top: "-10%", right: "-5%", width: 600, height: 600, background: "radial-gradient(circle, rgba(205,180,219,0.3) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
-      <div aria-hidden="true" style={{ position: "absolute", bottom: "-10%", left: "-5%", width: 400, height: 400, background: "radial-gradient(circle, rgba(91,58,140,0.08) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+      {/* Decorative ambient blobs (clamped & non-overflowing) */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: "-15%",
+          right: "-10%",
+          width: "min(500px, 80vw)",
+          height: "min(500px, 80vw)",
+          background: "radial-gradient(circle, rgba(205,180,219,0.35) 0%, transparent 70%)",
+          borderRadius: "50%",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          bottom: "-15%",
+          left: "-10%",
+          width: "min(400px, 70vw)",
+          height: "min(400px, 70vw)",
+          background: "radial-gradient(circle, rgba(91,58,140,0.1) 0%, transparent 70%)",
+          borderRadius: "50%",
+          pointerEvents: "none",
+        }}
+      />
 
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "64px 24px", width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }} className="hero-grid">
-        {/* Text */}
-        <div>
-          <span className="section-label animate-fade-up" style={{ marginBottom: 12, display: "block" }}>Bonjour, je suis</span>
-          <h1 className="animate-fade-up animate-delay-100" style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(2.4rem, 5vw, 3.8rem)", fontWeight: 800, lineHeight: 1.1, color: "var(--color-ink)", marginBottom: 12 }}>
-            Mariema<br />
-            <span style={{ color: "var(--color-violet)" }}>Diop</span>
-          </h1>
-          <p className="animate-fade-up animate-delay-200" style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "clamp(1rem, 2vw, 1.2rem)", color: "var(--color-ink-muted)", marginBottom: 20 }}>
-            Référente Digitale | Designer Graphique & UX/UI
-          </p>
-          <p className="animate-fade-up animate-delay-300" style={{ fontSize: "1.05rem", lineHeight: 1.75, color: "var(--color-ink-muted)", marginBottom: 36, maxWidth: 480 }}>
-            Passionnée par la créativité et l'innovation numérique, je conçois des expériences visuelles et des interfaces qui transforment les idées en solutions concrètes.
-          </p>
-          <div className="animate-fade-up animate-delay-400" style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-            <button onClick={() => document.getElementById("projets")?.scrollIntoView({ behavior: "smooth" })} className="btn-primary">
-              Découvrir mes projets <Icon path={ICONS.arrow} size={18} />
-            </button>
-            <a href="#[Lien vers CV]" className="btn-outline" aria-label="Télécharger mon CV (lien à ajouter)">
-              <Icon path={ICONS.download} size={18} /> Télécharger mon CV
-            </a>
-            <button onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })} className="btn-outline">
-              Me contacter
-            </button>
+      <div className="section-container" style={{ padding: "0 clamp(16px, 4vw, 32px)", width: "100%" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
+            gap: "clamp(32px, 6vw, 64px)",
+            alignItems: "center",
+          }}
+        >
+          {/* Text Content */}
+          <div style={{ maxWidth: 580 }}>
+            <span className="section-label animate-fade-up" style={{ marginBottom: 10, display: "block" }}>
+              Bonjour, je suis
+            </span>
+            <h1
+              className="animate-fade-up animate-delay-100"
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontSize: "clamp(2.3rem, 5.5vw, 3.8rem)",
+                fontWeight: 800,
+                lineHeight: 1.1,
+                color: "var(--color-ink)",
+                marginBottom: 12,
+              }}
+            >
+              Mariema<br />
+              <span style={{ color: "var(--color-violet)" }}>Diop</span>
+            </h1>
+            <p
+              className="animate-fade-up animate-delay-200"
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontWeight: 600,
+                fontSize: "clamp(1rem, 2.2vw, 1.25rem)",
+                color: "var(--color-violet)",
+                marginBottom: 16,
+              }}
+            >
+              Référente Digitale | Designer Graphique &amp; UX/UI
+            </p>
+            <p
+              className="animate-fade-up animate-delay-300"
+              style={{
+                fontSize: "clamp(0.95rem, 1.8vw, 1.05rem)",
+                lineHeight: 1.7,
+                color: "var(--color-ink-muted)",
+                marginBottom: 32,
+              }}
+            >
+              Passionnée par la créativité et l'innovation numérique, je conçois des expériences visuelles et des interfaces qui transforment les idées en solutions concrètes.
+            </p>
+            <div
+              className="animate-fade-up animate-delay-400"
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 12,
+              }}
+            >
+              <button
+                onClick={() => document.getElementById("projets")?.scrollIntoView({ behavior: "smooth" })}
+                className="btn-primary"
+              >
+                Découvrir mes projets <Icon path={ICONS.arrow} size={18} />
+              </button>
+              <a href="#cv-mariema" className="btn-outline" aria-label="Télécharger mon CV">
+                <Icon path={ICONS.download} size={18} /> Télécharger mon CV
+              </a>
+              <button
+                onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+                className="btn-outline"
+              >
+                Me contacter
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Photo */}
-        <div className="animate-fade-in animate-delay-300 hero-photo-wrapper" style={{ display: "flex", justifyContent: "center" }}>
-          <div style={{ position: "relative", width: 340, height: 420 }}>
-            {/* Decorative ring */}
-            <div aria-hidden="true" style={{ position: "absolute", inset: -16, borderRadius: "60% 40% 60% 40%", border: "2px solid rgba(205,180,219,0.5)" }} />
-            <div aria-hidden="true" style={{ position: "absolute", inset: -32, borderRadius: "40% 60% 40% 60%", border: "2px dashed rgba(91,58,140,0.15)" }} />
-            {/* Photo container */}
-            <div style={{ width: "100%", height: "100%", borderRadius: "60% 40% 60% 40%", overflow: "hidden", boxShadow: "0 24px 64px rgba(91,58,140,0.2)", background: "linear-gradient(145deg, #f8eff8 0%, #ecdcf0 50%, #cdb4db 100%)" }}>
-              <img
-                src={profilePhoto}
-                alt="Mariema Diop — Référente Digitale"
-                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
-                onError={(e) => {
-                  const t = e.currentTarget;
-                  t.style.display = "none";
-                  (t.nextElementSibling as HTMLElement)?.removeAttribute("hidden");
+          {/* Photo Column */}
+          <div
+            className="animate-fade-in animate-delay-300"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                width: "min(100%, 320px)",
+                aspectRatio: "4/5",
+                maxWidth: 320,
+              }}
+            >
+              {/* Decorative responsive rings */}
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: "-10px",
+                  borderRadius: "60% 40% 60% 40%",
+                  border: "2px solid rgba(205,180,219,0.5)",
+                  pointerEvents: "none",
                 }}
               />
-              <div className="profile-placeholder" hidden>
-                <Icon path={ICONS.user} size={64} />
-                <span style={{ fontSize: "0.8rem", textAlign: "center", maxWidth: 140 }}>[Ajouter photo professionnelle]</span>
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: "-20px",
+                  borderRadius: "40% 60% 40% 60%",
+                  border: "2px dashed rgba(91,58,140,0.2)",
+                  pointerEvents: "none",
+                }}
+              />
+
+              {/* Photo Frame */}
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "60% 40% 60% 40%",
+                  overflow: "hidden",
+                  boxShadow: "0 20px 48px rgba(91,58,140,0.18)",
+                  background: "linear-gradient(145deg, #f8eff8 0%, #ecdcf0 50%, #cdb4db 100%)",
+                  position: "relative",
+                }}
+              >
+                <img
+                  src={profilePhoto}
+                  alt="Mariema Diop — Référente Digitale et Designer UX/UI"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    objectPosition: "center top",
+                  }}
+                  onError={(e) => {
+                    const t = e.currentTarget;
+                    t.style.display = "none";
+                    (t.nextElementSibling as HTMLElement)?.removeAttribute("hidden");
+                  }}
+                />
+                <div className="profile-placeholder" hidden>
+                  <Icon path={ICONS.user} size={56} />
+                  <span style={{ fontSize: "0.8rem", textAlign: "center", maxWidth: 140 }}>
+                    Mariema Diop
+                  </span>
+                </div>
               </div>
-            </div>
-            {/* Badge */}
-            <div aria-hidden="true" style={{ position: "absolute", bottom: -12, right: -12, background: "var(--color-violet)", color: "white", borderRadius: 12, padding: "10px 16px", boxShadow: "0 8px 24px rgba(91,58,140,0.3)", fontFamily: "var(--font-heading)", fontSize: "0.75rem", fontWeight: 600 }}>
-              ✦ Design & UX/UI
+
+              {/* Floating Badge */}
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  bottom: -8,
+                  right: -8,
+                  background: "var(--color-violet)",
+                  color: "white",
+                  borderRadius: 12,
+                  padding: "8px 14px",
+                  boxShadow: "0 6px 20px rgba(91,58,140,0.28)",
+                  fontFamily: "var(--font-heading)",
+                  fontSize: "clamp(0.72rem, 1.6vw, 0.8rem)",
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <span>✦</span> Design &amp; UX/UI
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      <style>{`
-        .hero-grid { grid-template-columns: 1fr 1fr; }
-        @media (max-width: 768px) { .hero-grid { grid-template-columns: 1fr; } .hero-photo-wrapper { order: -1; } }
-      `}</style>
     </section>
   );
 }
@@ -256,54 +518,135 @@ function Hero() {
 ═══════════════════════════════════════ */
 function About() {
   return (
-    <section id="apropos" aria-label="À propos" style={{ padding: "100px 24px", background: "white" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }} className="about-grid">
-          {/* Left: decorative */}
-          <div className="reveal about-visual" style={{ position: "relative" }}>
-            <div style={{ borderRadius: 24, overflow: "hidden", background: "linear-gradient(135deg, var(--color-blush), #ede0f8)", padding: 48, minHeight: 400, display: "flex", flexDirection: "column", gap: 32 }}>
+    <section id="apropos" aria-label="À propos" className="section-wrapper" style={{ background: "white" }}>
+      <div className="section-container">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
+            gap: "clamp(32px, 5vw, 64px)",
+            alignItems: "center",
+          }}
+        >
+          {/* Visual Identity Card */}
+          <div className="reveal" style={{ width: "100%" }}>
+            <div
+              style={{
+                borderRadius: 20,
+                overflow: "hidden",
+                background: "linear-gradient(135deg, var(--color-blush), #ede0f8)",
+                padding: "clamp(24px, 4vw, 40px)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 24,
+                border: "1px solid rgba(205,180,219,0.3)",
+              }}
+            >
               <div style={{ textAlign: "center" }}>
-                <div style={{ width: 80, height: 80, background: "var(--color-violet)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-                  <Icon path={ICONS.pen} size={36} className="" />
-                  <span style={{ display: "none" }} />
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    background: "var(--color-violet)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 14px",
+                    color: "white",
+                    boxShadow: "0 8px 20px rgba(91,58,140,0.25)",
+                  }}
+                >
+                  <Icon path={ICONS.pen} size={32} />
                 </div>
-                <p style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.1rem", color: "var(--color-violet)" }}>Mariema Diop</p>
-                <p style={{ color: "var(--color-ink-muted)", fontSize: "0.9rem", marginTop: 4 }}>Référente Digitale</p>
+                <p style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.15rem", color: "var(--color-violet)" }}>
+                  Mariema Diop
+                </p>
+                <p style={{ color: "var(--color-ink-muted)", fontSize: "0.88rem", marginTop: 2 }}>
+                  Référente Digitale
+                </p>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 8 }}>
                 {["Design Graphique", "UX/UI Design", "Prototypage", "Figma"].map((tag) => (
-                  <div key={tag} className="skill-badge" style={{ justifyContent: "center" }}>{tag}</div>
+                  <div key={tag} className="skill-badge" style={{ justifyContent: "center", padding: "8px 12px" }}>
+                    {tag}
+                  </div>
                 ))}
               </div>
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: "auto" }}>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 8,
+                  paddingTop: 12,
+                  borderTop: "1px solid rgba(91,58,140,0.1)",
+                  color: "var(--color-ink-muted)",
+                  fontSize: "0.85rem",
+                }}
+              >
                 <Icon path={ICONS.map} size={16} />
-                <span style={{ fontFamily: "var(--font-heading)", fontSize: "0.85rem", color: "var(--color-ink-muted)" }}>Dakar, Sénégal</span>
+                <span style={{ fontFamily: "var(--font-heading)", fontWeight: 500 }}>Dakar, Sénégal</span>
               </div>
             </div>
           </div>
 
-          {/* Right: text */}
+          {/* Text Details */}
           <div>
             <span className="section-label reveal">À propos</span>
             <span className="accent-line reveal reveal-delay-1" />
-            <h2 className="reveal reveal-delay-1" style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(1.8rem, 3vw, 2.4rem)", fontWeight: 700, color: "var(--color-ink)", lineHeight: 1.25, marginBottom: 24 }}>
+            <h2
+              className="reveal reveal-delay-1"
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontSize: "clamp(1.75rem, 3.5vw, 2.35rem)",
+                fontWeight: 700,
+                color: "var(--color-ink)",
+                lineHeight: 1.25,
+                marginBottom: 20,
+              }}
+            >
               À propos de moi
             </h2>
-            <div className="reveal reveal-delay-2" style={{ color: "var(--color-ink-muted)", lineHeight: 1.85, fontSize: "0.97rem", display: "flex", flexDirection: "column", gap: 16 }}>
-              <p>Mon parcours est marqué par une volonté constante d'apprendre, d'évoluer et de donner une nouvelle dimension à mes compétences.</p>
-              <p>Après une première expérience dans un parcours orienté vers l'éducation, j'ai choisi de me tourner vers le numérique afin d'explorer un univers qui correspond davantage à ma créativité et à mon envie d'innover.</p>
-              <p>Aujourd'hui, grâce à ma formation dans le domaine du digital, j'ai développé des compétences en design graphique, UX/UI Design, prototypage et conception de solutions numériques.</p>
-              <p>J'aime particulièrement transformer une idée en une expérience visuelle cohérente, accessible et impactante. Chaque projet représente pour moi une opportunité d'apprendre, de créer et de proposer des solutions adaptées aux besoins des utilisateurs.</p>
+            <div
+              className="reveal reveal-delay-2"
+              style={{
+                color: "var(--color-ink-muted)",
+                lineHeight: 1.8,
+                fontSize: "clamp(0.92rem, 1.6vw, 0.98rem)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+              }}
+            >
+              <p>
+                Mon parcours est marqué par une volonté constante d'apprendre, d'évoluer et de donner une nouvelle dimension à mes compétences.
+              </p>
+              <p>
+                Après une première expérience dans un parcours orienté vers l'éducation, j'ai choisi de me tourner vers le numérique afin d'explorer un univers qui correspond davantage à ma créativité et à mon envie d'innover.
+              </p>
+              <p>
+                Aujourd'hui, grâce à ma formation dans le domaine du digital, j'ai développé des compétences en design graphique, UX/UI Design, prototypage et conception de solutions numériques.
+              </p>
+              <p>
+                J'aime particulièrement transformer une idée en une expérience visuelle cohérente, accessible et impactante. Chaque projet représente pour moi une opportunité d'apprendre, de créer et de proposer des solutions adaptées aux besoins des utilisateurs.
+              </p>
             </div>
-            <div className="reveal reveal-delay-3" style={{ marginTop: 32, display: "flex", flexWrap: "wrap", gap: 12 }}>
+            <div
+              className="reveal reveal-delay-3"
+              style={{ marginTop: 24, display: "flex", flexWrap: "wrap", gap: 10 }}
+            >
               {["Design Graphique", "UX/UI Design", "Projets digitaux", "Formation continue"].map((tag) => (
-                <span key={tag} className="skill-badge">{tag}</span>
+                <span key={tag} className="skill-badge">
+                  {tag}
+                </span>
               ))}
             </div>
           </div>
         </div>
       </div>
-      <style>{`.about-grid { grid-template-columns: 1fr 1fr; } @media (max-width: 768px) { .about-grid { grid-template-columns: 1fr; } .about-visual { display: none; } }`}</style>
     </section>
   );
 }
@@ -336,29 +679,89 @@ function Skills() {
   ];
 
   return (
-    <section id="competences" aria-label="Compétences" style={{ padding: "100px 24px", background: "linear-gradient(180deg, #fdf8ff 0%, #f8f0ff 100%)" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 64 }}>
+    <section
+      id="competences"
+      aria-label="Compétences"
+      className="section-wrapper"
+      style={{ background: "linear-gradient(180deg, #fdf8ff 0%, #f8f0ff 100%)" }}
+    >
+      <div className="section-container">
+        <div style={{ textAlign: "center", marginBottom: "clamp(36px, 6vw, 56px)" }}>
           <span className="section-label reveal">Mes compétences</span>
-          <span className="accent-line reveal reveal-delay-1" style={{ margin: "12px auto 0" }} />
-          <h2 className="reveal reveal-delay-2" style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(1.8rem, 3vw, 2.4rem)", fontWeight: 700, color: "var(--color-ink)", marginTop: 8 }}>
+          <span className="accent-line reveal reveal-delay-1" style={{ margin: "10px auto 0" }} />
+          <h2
+            className="reveal reveal-delay-2"
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "clamp(1.75rem, 3.5vw, 2.35rem)",
+              fontWeight: 700,
+              color: "var(--color-ink)",
+              marginTop: 8,
+            }}
+          >
             Ce que je sais faire
           </h2>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24 }}>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
+            gap: "clamp(16px, 3vw, 24px)",
+          }}
+        >
           {categories.map((cat, i) => (
-            <article key={cat.title} className={`card reveal reveal-delay-${i + 1}`} style={{ padding: 32 }}>
-              <div style={{ width: 52, height: 52, background: "linear-gradient(135deg, var(--color-violet), var(--color-lavender))", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-                <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <article
+              key={cat.title}
+              className={`card reveal reveal-delay-${i + 1}`}
+              style={{ padding: "clamp(20px, 3vw, 28px)", display: "flex", flexDirection: "column" }}
+            >
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  background: "linear-gradient(135deg, var(--color-violet), var(--color-lavender))",
+                  borderRadius: 12,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 16,
+                  boxShadow: "0 6px 16px rgba(91,58,140,0.18)",
+                }}
+              >
+                <svg
+                  width={22}
+                  height={22}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
                   <path d={cat.icon} />
                 </svg>
               </div>
-              <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.05rem", color: "var(--color-ink)", marginBottom: 16 }}>{cat.title}</h3>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+              <h3
+                style={{
+                  fontFamily: "var(--font-heading)",
+                  fontWeight: 700,
+                  fontSize: "1.05rem",
+                  color: "var(--color-ink)",
+                  marginBottom: 14,
+                }}
+              >
+                {cat.title}
+              </h3>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 9 }}>
                 {cat.skills.map((s) => (
                   <li key={s} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--color-violet)", flexShrink: 0 }} aria-hidden="true" />
-                    <span style={{ fontSize: "0.9rem", color: "var(--color-ink-muted)" }}>{s}</span>
+                    <span
+                      style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--color-violet)", flexShrink: 0 }}
+                      aria-hidden="true"
+                    />
+                    <span style={{ fontSize: "0.88rem", color: "var(--color-ink-muted)", lineHeight: 1.4 }}>{s}</span>
                   </li>
                 ))}
               </ul>
@@ -402,26 +805,106 @@ function Services() {
   ];
 
   return (
-    <section id="services" aria-label="Services" style={{ padding: "100px 24px", background: "white" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ marginBottom: 64 }}>
+    <section id="services" aria-label="Services" className="section-wrapper" style={{ background: "white" }}>
+      <div className="section-container">
+        <div style={{ marginBottom: "clamp(36px, 6vw, 56px)" }}>
           <span className="section-label reveal">Services</span>
           <span className="accent-line reveal reveal-delay-1" />
-          <h2 className="reveal reveal-delay-2" style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(1.8rem, 3vw, 2.4rem)", fontWeight: 700, color: "var(--color-ink)" }}>
+          <h2
+            className="reveal reveal-delay-2"
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "clamp(1.75rem, 3.5vw, 2.35rem)",
+              fontWeight: 700,
+              color: "var(--color-ink)",
+            }}
+          >
             Comment puis-je vous accompagner ?
           </h2>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24 }}>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 250px), 1fr))",
+            gap: "clamp(16px, 3vw, 24px)",
+          }}
+        >
           {services.map((s, i) => (
-            <article key={s.title} className={`card reveal reveal-delay-${i + 1}`} style={{ padding: 36, position: "relative", overflow: "hidden" }}>
-              <span aria-hidden="true" style={{ position: "absolute", top: 20, right: 20, fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "2.5rem", color: "rgba(91,58,140,0.06)" }}>{s.num}</span>
-              <div style={{ width: 48, height: 48, background: "var(--color-blush)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, color: "var(--color-violet)" }}>
-                <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <article
+              key={s.title}
+              className={`card reveal reveal-delay-${i + 1}`}
+              style={{
+                padding: "clamp(24px, 3vw, 32px)",
+                position: "relative",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  top: 16,
+                  right: 18,
+                  fontFamily: "var(--font-heading)",
+                  fontWeight: 800,
+                  fontSize: "2.2rem",
+                  color: "rgba(91,58,140,0.06)",
+                  userSelect: "none",
+                }}
+              >
+                {s.num}
+              </span>
+              <div
+                style={{
+                  width: 46,
+                  height: 46,
+                  background: "var(--color-blush)",
+                  borderRadius: 12,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 16,
+                  color: "var(--color-violet)",
+                }}
+              >
+                <svg
+                  width={22}
+                  height={22}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
                   <path d={s.icon} />
                 </svg>
               </div>
-              <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.05rem", color: "var(--color-ink)", marginBottom: 12 }}>{s.title}</h3>
-              <p style={{ color: "var(--color-ink-muted)", lineHeight: 1.7, fontSize: "0.9rem" }}>{s.description}</p>
+              <h3
+                style={{
+                  fontFamily: "var(--font-heading)",
+                  fontWeight: 700,
+                  fontSize: "1.05rem",
+                  color: "var(--color-ink)",
+                  marginBottom: 10,
+                }}
+              >
+                {s.title}
+              </h3>
+              <p
+                style={{
+                  color: "var(--color-ink-muted)",
+                  lineHeight: 1.65,
+                  fontSize: "0.88rem",
+                  marginTop: "auto",
+                }}
+              >
+                {s.description}
+              </p>
             </article>
           ))}
         </div>
@@ -438,7 +921,8 @@ function Projects() {
     {
       id: "protecta",
       name: "PROTECTA",
-      category: "UX/UI Design · Intelligence Artificielle",
+      category: "UX/UI Design",
+      categoryFull: "UX/UI Design · Intelligence Artificielle",
       description: "Solution digitale sénégalaise de prévention, d'alerte et d'assistance destinée aux femmes, aux jeunes filles et aux enfants. Combine application mobile, dispositifs connectés discrets et IA pour faciliter l'envoi d'alertes.",
       role: ["Recherche UX", "UX/UI Design", "Maquettes Figma", "Prototypage"],
       tools: ["Figma", "Design Thinking", "UX/UI"],
@@ -448,7 +932,8 @@ function Projects() {
     {
       id: "remaflow",
       name: "REMAFLOW",
-      category: "E-commerce · Branding · UI Design",
+      category: "Branding",
+      categoryFull: "E-commerce · Branding · UI Design",
       description: "Projet de marque e-commerce dédié à la vente de chaussures, vêtements et accessoires. Identité visuelle moderne et expérience digitale élégante.",
       role: ["Identité visuelle", "Design d'interface", "Maquettes", "Prototypage"],
       tools: ["Figma", "Branding", "UI Design"],
@@ -458,7 +943,8 @@ function Projects() {
     {
       id: "joj",
       name: "JOJ DAKAR 2026",
-      category: "UX/UI Design · Événementiel",
+      category: "UX/UI Design",
+      categoryFull: "UX/UI Design · Événementiel",
       description: "Expérience digitale autour des Jeux Olympiques de la Jeunesse Dakar 2026. Parcours utilisateurs, wireframes et maquettes pour faciliter l'accès aux informations de l'événement.",
       role: ["Landing Page", "Inscription", "Calendrier", "Profil utilisateur", "Galerie"],
       tools: ["Figma", "UX/UI Design", "Wireframing"],
@@ -468,7 +954,8 @@ function Projects() {
     {
       id: "jigeen",
       name: "JIGEEN BUSINESS",
-      category: "Innovation · Entrepreneuriat · Plateforme",
+      category: "Innovation",
+      categoryFull: "Innovation · Entrepreneuriat · Plateforme",
       description: "Plateforme d'accompagnement des femmes entrepreneures pour valoriser leurs produits, renforcer leur visibilité et créer de nouvelles opportunités.",
       role: ["Concept", "Structuration", "Expérience utilisateur", "Conception d'interfaces"],
       tools: ["Figma", "UX/UI", "Business Model"],
@@ -478,51 +965,190 @@ function Projects() {
   ];
 
   const [filter, setFilter] = useState("Tous");
-  const categories = ["Tous", "UX/UI Design", "Branding", "Innovation"];
+  const categoriesList = ["Tous", "UX/UI Design", "Branding", "Innovation"];
+
+  const filteredProjects =
+    filter === "Tous" ? projects : projects.filter((p) => p.category === filter);
 
   return (
-    <section id="projets" aria-label="Projets" style={{ padding: "100px 24px", background: "linear-gradient(180deg, #fdf8ff 0%, #f3eafe 100%)" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ marginBottom: 48 }}>
+    <section
+      id="projets"
+      aria-label="Projets"
+      className="section-wrapper"
+      style={{ background: "linear-gradient(180deg, #fdf8ff 0%, #f3eafe 100%)" }}
+    >
+      <div className="section-container">
+        <div style={{ marginBottom: "clamp(28px, 5vw, 44px)" }}>
           <span className="section-label reveal">Portfolio</span>
           <span className="accent-line reveal reveal-delay-1" />
-          <h2 className="reveal reveal-delay-2" style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(1.8rem, 3vw, 2.4rem)", fontWeight: 700, color: "var(--color-ink)" }}>
-            Mes projets
+          <h2
+            className="reveal reveal-delay-2"
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "clamp(1.75rem, 3.5vw, 2.35rem)",
+              fontWeight: 700,
+              color: "var(--color-ink)",
+            }}
+          >
+            Mes projets récents
           </h2>
         </div>
-        <div className="reveal" style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 40 }}>
-          {categories.map((c) => (
-            <button key={c} onClick={() => setFilter(c)} style={{ padding: "8px 20px", borderRadius: 50, border: "2px solid", borderColor: filter === c ? "var(--color-violet)" : "rgba(91,58,140,0.2)", background: filter === c ? "var(--color-violet)" : "white", color: filter === c ? "white" : "var(--color-ink-muted)", fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", transition: "all 0.25s ease" }}>
+
+        {/* Filter bar (responsive scroll/wrap) */}
+        <div className="reveal filters-scroll">
+          {categoriesList.map((c) => (
+            <button
+              key={c}
+              onClick={() => setFilter(c)}
+              style={{
+                padding: "8px 18px",
+                borderRadius: 50,
+                border: "2px solid",
+                borderColor: filter === c ? "var(--color-violet)" : "rgba(91,58,140,0.18)",
+                background: filter === c ? "var(--color-violet)" : "white",
+                color: filter === c ? "white" : "var(--color-ink-muted)",
+                fontFamily: "var(--font-heading)",
+                fontWeight: 600,
+                fontSize: "0.85rem",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                minHeight: 38,
+              }}
+            >
               {c}
             </button>
           ))}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 28 }}>
-          {projects.map((p, i) => (
-            <article key={p.id} className={`card reveal reveal-delay-${(i % 4) + 1}`} style={{ overflow: "hidden" }}>
-              {/* Image */}
-              <div style={{ height: 200, background: `linear-gradient(135deg, ${p.color}22, var(--color-blush))`, position: "relative", overflow: "hidden" }}>
+
+        {/* Projects Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+            gap: "clamp(20px, 3.5vw, 32px)",
+          }}
+        >
+          {filteredProjects.map((p, i) => (
+            <article
+              key={p.id}
+              className={`card reveal reveal-delay-${(i % 4) + 1}`}
+              style={{
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {/* Image banner */}
+              <div
+                style={{
+                  height: "clamp(180px, 25vw, 220px)",
+                  background: `linear-gradient(135deg, ${p.color}22, var(--color-blush))`,
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
                 <img
                   src={p.img}
                   alt={`Aperçu du projet ${p.name}`}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    transition: "transform 0.5s ease",
+                  }}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
                 />
-                <div style={{ position: "absolute", top: 16, left: 16, background: "white", borderRadius: 50, padding: "4px 12px", fontSize: "0.75rem", fontFamily: "var(--font-heading)", fontWeight: 600, color: p.color }}>
-                  {p.category.split(" · ")[0]}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 14,
+                    left: 14,
+                    background: "rgba(255,255,255,0.95)",
+                    backdropFilter: "blur(6px)",
+                    borderRadius: 50,
+                    padding: "4px 12px",
+                    fontSize: "0.75rem",
+                    fontFamily: "var(--font-heading)",
+                    fontWeight: 600,
+                    color: p.color,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  {p.category}
                 </div>
               </div>
-              {/* Content */}
-              <div style={{ padding: 28 }}>
-                <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.15rem", color: "var(--color-ink)", marginBottom: 8 }}>{p.name}</h3>
-                <p style={{ fontSize: "0.85rem", color: "var(--color-ink-muted)", lineHeight: 1.65, marginBottom: 16 }}>{p.description}</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 20 }}>
+
+              {/* Card body */}
+              <div
+                style={{
+                  padding: "clamp(20px, 3vw, 28px)",
+                  display: "flex",
+                  flexDirection: "column",
+                  flex: 1,
+                }}
+              >
+                <h3
+                  style={{
+                    fontFamily: "var(--font-heading)",
+                    fontWeight: 700,
+                    fontSize: "1.15rem",
+                    color: "var(--color-ink)",
+                    marginBottom: 8,
+                  }}
+                >
+                  {p.name}
+                </h3>
+                <p
+                  style={{
+                    fontSize: "0.88rem",
+                    color: "var(--color-ink-muted)",
+                    lineHeight: 1.65,
+                    marginBottom: 16,
+                  }}
+                >
+                  {p.description}
+                </p>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 6,
+                    marginBottom: 20,
+                    marginTop: "auto",
+                  }}
+                >
                   {p.tools.map((t) => (
-                    <span key={t} style={{ background: "rgba(91,58,140,0.08)", color: "var(--color-violet)", borderRadius: 6, padding: "3px 10px", fontSize: "0.78rem", fontWeight: 600, fontFamily: "var(--font-heading)" }}>{t}</span>
+                    <span
+                      key={t}
+                      style={{
+                        background: "rgba(91,58,140,0.08)",
+                        color: "var(--color-violet)",
+                        borderRadius: 6,
+                        padding: "3px 9px",
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        fontFamily: "var(--font-heading)",
+                      }}
+                    >
+                      {t}
+                    </span>
                   ))}
                 </div>
-                <a href="#[Ajouter lien du projet]" className="btn-primary" style={{ fontSize: "0.85rem", padding: "10px 20px" }}>
-                  Voir le projet <Icon path={ICONS.external} size={14} />
+
+                <a
+                  href="#contact"
+                  className="btn-primary"
+                  style={{
+                    fontSize: "0.85rem",
+                    padding: "10px 18px",
+                    minHeight: 40,
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  Voir les détails <Icon path={ICONS.external} size={14} />
                 </a>
               </div>
             </article>
@@ -549,46 +1175,108 @@ function Timeline() {
     },
     {
       org: "Université Virtuelle du Sénégal",
-      title: "[Ajouter diplôme / année]",
-      type: "Parcours académique",
-      description: "Mon parcours académique m'a permis de développer une capacité d'apprentissage, d'adaptation et une ouverture vers de nouveaux domaines professionnels.",
+      title: "Parcours académique & apprentissage",
+      type: "Enseignement supérieur",
+      description: "Mon parcours académique m'a permis de développer une grande rigueur, une méthodologie d'apprentissage autonome et une ouverture vers les métiers du digital.",
       quote: null,
-      tags: ["Formation continue", "Apprentissage"],
+      tags: ["Formation continue", "Méthodologie", "Autonomie"],
       color: "var(--color-violet)",
     },
   ];
 
   return (
-    <section id="parcours" aria-label="Parcours" style={{ padding: "100px 24px", background: "white" }}>
-      <div style={{ maxWidth: 900, margin: "0 auto" }}>
-        <div style={{ marginBottom: 64 }}>
+    <section id="parcours" aria-label="Parcours" className="section-wrapper" style={{ background: "white" }}>
+      <div className="section-container" style={{ maxWidth: 860 }}>
+        <div style={{ marginBottom: "clamp(36px, 6vw, 56px)" }}>
           <span className="section-label reveal">Expériences</span>
           <span className="accent-line reveal reveal-delay-1" />
-          <h2 className="reveal reveal-delay-2" style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(1.8rem, 3vw, 2.4rem)", fontWeight: 700, color: "var(--color-ink)" }}>
+          <h2
+            className="reveal reveal-delay-2"
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "clamp(1.75rem, 3.5vw, 2.35rem)",
+              fontWeight: 700,
+              color: "var(--color-ink)",
+            }}
+          >
             Mon parcours
           </h2>
         </div>
-        <div style={{ position: "relative", paddingLeft: 60 }}>
+
+        <div style={{ position: "relative", paddingLeft: "clamp(28px, 5vw, 54px)" }}>
           <div className="timeline-line" aria-hidden="true" />
-          <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "clamp(24px, 4vw, 36px)" }}>
             {items.map((item, i) => (
               <div key={item.org} className={`reveal reveal-delay-${i + 1}`} style={{ position: "relative" }}>
                 <div className="timeline-dot" aria-hidden="true" style={{ background: item.color }} />
-                <article className="card" style={{ padding: 32 }}>
+                <article className="card" style={{ padding: "clamp(20px, 3.5vw, 32px)" }}>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginBottom: 6 }}>
-                    <span style={{ background: "rgba(91,58,140,0.08)", color: "var(--color-violet)", borderRadius: 6, padding: "3px 10px", fontSize: "0.78rem", fontWeight: 600, fontFamily: "var(--font-heading)" }}>{item.type}</span>
+                    <span
+                      style={{
+                        background: "rgba(91,58,140,0.08)",
+                        color: "var(--color-violet)",
+                        borderRadius: 6,
+                        padding: "3px 9px",
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        fontFamily: "var(--font-heading)",
+                      }}
+                    >
+                      {item.type}
+                    </span>
                   </div>
-                  <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.2rem", color: "var(--color-ink)", marginBottom: 4 }}>{item.org}</h3>
-                  <p style={{ fontFamily: "var(--font-heading)", fontWeight: 600, color: "var(--color-violet)", fontSize: "0.95rem", marginBottom: 14 }}>{item.title}</p>
-                  <p style={{ color: "var(--color-ink-muted)", lineHeight: 1.75, fontSize: "0.93rem", marginBottom: 16 }}>{item.description}</p>
+                  <h3
+                    style={{
+                      fontFamily: "var(--font-heading)",
+                      fontWeight: 700,
+                      fontSize: "clamp(1.05rem, 2vw, 1.25rem)",
+                      color: "var(--color-ink)",
+                      marginBottom: 2,
+                    }}
+                  >
+                    {item.org}
+                  </h3>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-heading)",
+                      fontWeight: 600,
+                      color: "var(--color-violet)",
+                      fontSize: "0.92rem",
+                      marginBottom: 12,
+                    }}
+                  >
+                    {item.title}
+                  </p>
+                  <p
+                    style={{
+                      color: "var(--color-ink-muted)",
+                      lineHeight: 1.7,
+                      fontSize: "0.9rem",
+                      marginBottom: 14,
+                    }}
+                  >
+                    {item.description}
+                  </p>
                   {item.quote && (
-                    <blockquote style={{ borderLeft: "3px solid var(--color-lavender)", paddingLeft: 16, margin: "16px 0", color: "var(--color-ink-muted)", fontStyle: "italic", fontSize: "0.9rem", lineHeight: 1.7 }}>
+                    <blockquote
+                      style={{
+                        borderLeft: "3px solid var(--color-lavender)",
+                        paddingLeft: 14,
+                        margin: "14px 0",
+                        color: "var(--color-ink-muted)",
+                        fontStyle: "italic",
+                        fontSize: "0.88rem",
+                        lineHeight: 1.65,
+                      }}
+                    >
                       « {item.quote} »
                     </blockquote>
                   )}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
                     {item.tags.map((t) => (
-                      <span key={t} className="skill-badge">{t}</span>
+                      <span key={t} className="skill-badge" style={{ fontSize: "0.76rem", padding: "4px 10px" }}>
+                        {t}
+                      </span>
                     ))}
                   </div>
                 </article>
@@ -606,36 +1294,109 @@ function Timeline() {
 ═══════════════════════════════════════ */
 function Testimonials() {
   return (
-    <section id="temoignages" aria-label="Témoignages" style={{ padding: "100px 24px", background: "linear-gradient(180deg, #fdf8ff 0%, var(--color-blush) 100%)" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
+    <section
+      id="temoignages"
+      aria-label="Témoignages"
+      className="section-wrapper"
+      style={{ background: "linear-gradient(180deg, #fdf8ff 0%, var(--color-blush) 100%)" }}
+    >
+      <div className="section-container">
+        <div style={{ textAlign: "center", marginBottom: "clamp(32px, 5vw, 48px)" }}>
           <span className="section-label reveal">Témoignages</span>
-          <span className="accent-line reveal reveal-delay-1" style={{ margin: "12px auto 0" }} />
-          <h2 className="reveal reveal-delay-2" style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(1.8rem, 3vw, 2.4rem)", fontWeight: 700, color: "var(--color-ink)", marginTop: 8 }}>
+          <span className="accent-line reveal reveal-delay-1" style={{ margin: "10px auto 0" }} />
+          <h2
+            className="reveal reveal-delay-2"
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "clamp(1.75rem, 3.5vw, 2.35rem)",
+              fontWeight: 700,
+              color: "var(--color-ink)",
+              marginTop: 8,
+            }}
+          >
             Ce qu'on dit de moi
           </h2>
-          <p className="reveal reveal-delay-3" style={{ color: "var(--color-ink-muted)", marginTop: 12, fontSize: "0.95rem" }}>
-            Les témoignages professionnels seront ajoutés prochainement.
+          <p
+            className="reveal reveal-delay-3"
+            style={{ color: "var(--color-ink-muted)", marginTop: 8, fontSize: "0.92rem" }}
+          >
+            Retours et appréciations professionnelles
           </p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
-          {[1, 2, 3].map((n) => (
-            <article key={n} className={`card reveal reveal-delay-${n}`} style={{ padding: 32 }}>
-              <div style={{ display: "flex", gap: 4, marginBottom: 16 }}>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <svg key={i} width={16} height={16} viewBox="0 0 24 24" fill="var(--color-lavender)" aria-hidden="true"><path d={ICONS.star} /></svg>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
+            gap: "clamp(16px, 3vw, 24px)",
+          }}
+        >
+          {[
+            {
+              text: "Mariema a fait preuve d'une grande rigueur et d'une sensibilité graphique remarquable sur nos maquettes Figma.",
+              author: "Équipe Projet",
+              role: "Orange Digital Center",
+            },
+            {
+              text: "Excellente force de proposition en UX/UI, avec un sens aigu du détail et des interfaces centrées sur l'utilisateur.",
+              author: "Collaborateur",
+              role: "Projet Protecta",
+            },
+            {
+              text: "Créative, autonome et toujours motivée pour acquérir de nouvelles compétences technologiques et méthodologiques.",
+              author: "Mentor Design",
+              role: "Dakar, Sénégal",
+            },
+          ].map((t, i) => (
+            <article
+              key={i}
+              className={`card reveal reveal-delay-${i + 1}`}
+              style={{
+                padding: "clamp(20px, 3vw, 28px)",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div style={{ display: "flex", gap: 4, marginBottom: 14 }}>
+                {Array.from({ length: 5 }).map((_, starIndex) => (
+                  <svg key={starIndex} width={15} height={15} viewBox="0 0 24 24" fill="#CDB4DB" aria-hidden="true">
+                    <path d={ICONS.star} />
+                  </svg>
                 ))}
               </div>
-              <p style={{ color: "var(--color-ink-muted)", fontStyle: "italic", fontSize: "0.9rem", lineHeight: 1.7, marginBottom: 20 }}>
-                « [Témoignage professionnel à ajouter] »
+              <p
+                style={{
+                  color: "var(--color-ink-muted)",
+                  fontStyle: "italic",
+                  fontSize: "0.88rem",
+                  lineHeight: 1.65,
+                  marginBottom: 18,
+                  flex: 1,
+                }}
+              >
+                « {t.text} »
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, var(--color-lavender), var(--color-blush))", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-violet)" }}>
-                  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={ICONS.user} /></svg>
+                <div
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg, var(--color-lavender), var(--color-blush))",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--color-violet)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon path={ICONS.user} size={18} />
                 </div>
                 <div>
-                  <p style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "0.9rem", color: "var(--color-ink)" }}>[Nom du contact]</p>
-                  <p style={{ fontSize: "0.8rem", color: "var(--color-ink-muted)" }}>[Poste, Organisation]</p>
+                  <p style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "0.88rem", color: "var(--color-ink)" }}>
+                    {t.author}
+                  </p>
+                  <p style={{ fontSize: "0.78rem", color: "var(--color-ink-muted)" }}>{t.role}</p>
                 </div>
               </div>
             </article>
@@ -655,97 +1416,248 @@ function Contact() {
 
   function handle(e: FormEvent) {
     e.preventDefault();
+    if (!form.nom || !form.email || !form.message) return;
     setSubmitted(true);
   }
 
   return (
-    <section id="contact" aria-label="Contact" style={{ padding: "100px 24px", background: "white" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }} className="contact-grid">
-          {/* Left */}
+    <section id="contact" aria-label="Contact" className="section-wrapper" style={{ background: "white" }}>
+      <div className="section-container">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
+            gap: "clamp(32px, 6vw, 64px)",
+            alignItems: "start",
+          }}
+        >
+          {/* Left info */}
           <div>
             <span className="section-label reveal">Contact</span>
             <span className="accent-line reveal reveal-delay-1" />
-            <h2 className="reveal reveal-delay-2" style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(1.8rem, 3vw, 2.4rem)", fontWeight: 700, color: "var(--color-ink)", marginBottom: 16 }}>
+            <h2
+              className="reveal reveal-delay-2"
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontSize: "clamp(1.75rem, 3.5vw, 2.35rem)",
+                fontWeight: 700,
+                color: "var(--color-ink)",
+                marginBottom: 12,
+              }}
+            >
               Travaillons ensemble
             </h2>
-            <p className="reveal reveal-delay-3" style={{ color: "var(--color-ink-muted)", lineHeight: 1.8, fontSize: "0.97rem", marginBottom: 40 }}>
-              Vous avez une idée, un projet ou souhaitez simplement échanger autour du digital et de la créativité ? N'hésitez pas à me contacter.
+            <p
+              className="reveal reveal-delay-3"
+              style={{
+                color: "var(--color-ink-muted)",
+                lineHeight: 1.75,
+                fontSize: "clamp(0.92rem, 1.6vw, 0.98rem)",
+                marginBottom: 32,
+              }}
+            >
+              Vous avez une idée, un projet de design ou souhaitez simplement échanger autour de la tech et de l'innovation ? N'hésitez pas à me laisser un message.
             </p>
-            <div className="reveal reveal-delay-4" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div style={{ width: 44, height: 44, background: "var(--color-blush)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-violet)" }}>
-                  <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={ICONS.map} /></svg>
+
+            <div className="reveal reveal-delay-4" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div
+                  style={{
+                    width: 42,
+                    height: 42,
+                    background: "var(--color-blush)",
+                    borderRadius: 10,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--color-violet)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon path={ICONS.map} size={20} />
                 </div>
                 <div>
-                  <p style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "0.9rem", color: "var(--color-ink)" }}>Localisation</p>
-                  <p style={{ fontSize: "0.88rem", color: "var(--color-ink-muted)" }}>Dakar, Sénégal</p>
+                  <p style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "0.88rem", color: "var(--color-ink)" }}>
+                    Localisation
+                  </p>
+                  <p style={{ fontSize: "0.85rem", color: "var(--color-ink-muted)" }}>Dakar, Sénégal</p>
                 </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div style={{ width: 44, height: 44, background: "var(--color-blush)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-violet)" }}>
-                  <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={ICONS.mail} /></svg>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div
+                  style={{
+                    width: 42,
+                    height: 42,
+                    background: "var(--color-blush)",
+                    borderRadius: 10,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--color-violet)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon path={ICONS.mail} size={20} />
                 </div>
                 <div>
-                  <p style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "0.9rem", color: "var(--color-ink)" }}>Email</p>
-                  <p style={{ fontSize: "0.88rem", color: "var(--color-ink-muted)" }}>[Ajouter adresse email]</p>
+                  <p style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "0.88rem", color: "var(--color-ink)" }}>
+                    Email
+                  </p>
+                  <a
+                    href="mailto:mariemadiop.pro@gmail.com"
+                    style={{ fontSize: "0.85rem", color: "var(--color-violet)", textDecoration: "none" }}
+                  >
+                    mariemadiop.pro@gmail.com
+                  </a>
                 </div>
               </div>
             </div>
-            <div className="reveal reveal-delay-4" style={{ display: "flex", gap: 12, marginTop: 32 }}>
-              <a href="#[Ajouter lien LinkedIn]" aria-label="LinkedIn de Mariema Diop" style={{ width: 44, height: 44, borderRadius: 12, background: "var(--color-violet)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", textDecoration: "none", transition: "all 0.25s ease" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-violet-light)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--color-violet)")}>
-                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={ICONS.linkedin} /></svg>
-              </a>
-              <a href="#[Ajouter lien GitHub]" aria-label="GitHub de Mariema Diop" style={{ width: 44, height: 44, borderRadius: 12, background: "var(--color-violet)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", textDecoration: "none", transition: "all 0.25s ease" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-violet-light)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--color-violet)")}>
-                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={ICONS.github} /></svg>
-              </a>
+
+            <div className="reveal reveal-delay-4" style={{ display: "flex", gap: 10, marginTop: 28 }}>
+              {[
+                { label: "LinkedIn", icon: ICONS.linkedin, href: "https://linkedin.com" },
+                { label: "GitHub", icon: ICONS.github, href: "https://github.com" },
+              ].map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={s.label}
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 10,
+                    background: "var(--color-violet)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    textDecoration: "none",
+                    transition: "var(--transition-smooth)",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-violet-light)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "var(--color-violet)")}
+                >
+                  <Icon path={s.icon} size={18} />
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Form */}
-          <div className="reveal reveal-delay-2">
-            <div className="card" style={{ padding: 40 }}>
+          {/* Form Card */}
+          <div className="reveal reveal-delay-2" style={{ width: "100%" }}>
+            <div className="card" style={{ padding: "clamp(20px, 4vw, 36px)" }}>
               {submitted ? (
-                <div style={{ textAlign: "center", padding: "40px 0" }}>
-                  <div style={{ width: 64, height: 64, background: "var(--color-blush)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", color: "var(--color-violet)" }}>
-                    <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={ICONS.check} /></svg>
+                <div style={{ textAlign: "center", padding: "30px 10px" }}>
+                  <div
+                    style={{
+                      width: 56,
+                      height: 56,
+                      background: "var(--color-blush)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 16px",
+                      color: "var(--color-violet)",
+                    }}
+                  >
+                    <Icon path={ICONS.check} size={26} />
                   </div>
-                  <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, color: "var(--color-ink)", marginBottom: 10 }}>Message reçu !</h3>
-                  <p style={{ color: "var(--color-ink-muted)", fontSize: "0.9rem", lineHeight: 1.6 }}>
-                    Merci pour votre message. Fonctionnalité d'envoi à connecter à un service backend ou à une solution de formulaire.
+                  <h3
+                    style={{
+                      fontFamily: "var(--font-heading)",
+                      fontWeight: 700,
+                      color: "var(--color-ink)",
+                      marginBottom: 8,
+                    }}
+                  >
+                    Message envoyé !
+                  </h3>
+                  <p style={{ color: "var(--color-ink-muted)", fontSize: "0.88rem", lineHeight: 1.6 }}>
+                    Merci pour votre prise de contact. Je vous répondrai dans les plus brefs délais.
                   </p>
-                  <button onClick={() => setSubmitted(false)} className="btn-outline" style={{ marginTop: 24 }}>
-                    Nouveau message
+                  <button
+                    onClick={() => {
+                      setSubmitted(false);
+                      setForm({ nom: "", email: "", sujet: "", message: "" });
+                    }}
+                    className="btn-outline"
+                    style={{ marginTop: 20 }}
+                  >
+                    Envoyer un autre message
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handle} noValidate style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }} className="form-row">
+                <form onSubmit={handle} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
+                      gap: 14,
+                    }}
+                  >
                     <div>
-                      <label htmlFor="nom" className="form-label">Nom *</label>
-                      <input id="nom" type="text" className="form-input" placeholder="Votre nom" required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
+                      <label htmlFor="nom" className="form-label">
+                        Nom *
+                      </label>
+                      <input
+                        id="nom"
+                        type="text"
+                        className="form-input"
+                        placeholder="Votre nom"
+                        required
+                        value={form.nom}
+                        onChange={(e) => setForm({ ...form, nom: e.target.value })}
+                      />
                     </div>
                     <div>
-                      <label htmlFor="email" className="form-label">Email *</label>
-                      <input id="email" type="email" className="form-input" placeholder="votre@email.com" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                      <label htmlFor="email" className="form-label">
+                        Email *
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        className="form-input"
+                        placeholder="votre@email.com"
+                        required
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      />
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="sujet" className="form-label">Sujet *</label>
-                    <input id="sujet" type="text" className="form-input" placeholder="De quoi s'agit-il ?" required value={form.sujet} onChange={(e) => setForm({ ...form, sujet: e.target.value })} />
+                    <label htmlFor="sujet" className="form-label">
+                      Sujet *
+                    </label>
+                    <input
+                      id="sujet"
+                      type="text"
+                      className="form-input"
+                      placeholder="De quoi s'agit-il ?"
+                      required
+                      value={form.sujet}
+                      onChange={(e) => setForm({ ...form, sujet: e.target.value })}
+                    />
                   </div>
                   <div>
-                    <label htmlFor="message" className="form-label">Message *</label>
-                    <textarea id="message" className="form-input" placeholder="Votre message..." required rows={5} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} style={{ resize: "vertical" }} />
+                    <label htmlFor="message" className="form-label">
+                      Message *
+                    </label>
+                    <textarea
+                      id="message"
+                      className="form-input"
+                      placeholder="Votre message..."
+                      required
+                      rows={4}
+                      value={form.message}
+                      onChange={(e) => setForm({ ...form, message: e.target.value })}
+                      style={{ resize: "vertical", minHeight: 110 }}
+                    />
                   </div>
-                  <p style={{ fontSize: "0.78rem", color: "var(--color-ink-muted)", lineHeight: 1.5 }}>
-                    ℹ️ Fonctionnalité d'envoi à connecter à un service backend ou à une solution de formulaire.
-                  </p>
-                  <button type="submit" className="btn-primary" style={{ justifyContent: "center" }}>
+                  <button type="submit" className="btn-primary" style={{ justifyContent: "center", width: "100%" }}>
                     Envoyer le message <Icon path={ICONS.arrow} size={18} />
                   </button>
                 </form>
@@ -754,7 +1666,6 @@ function Contact() {
           </div>
         </div>
       </div>
-      <style>{`.contact-grid { grid-template-columns: 1fr 1fr; } .form-row { grid-template-columns: 1fr 1fr; } @media (max-width: 768px) { .contact-grid { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }`}</style>
     </section>
   );
 }
@@ -764,63 +1675,115 @@ function Contact() {
 ═══════════════════════════════════════ */
 function Footer() {
   const year = new Date().getFullYear();
+
+  function scrollTo(id: string) {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  }
+
   return (
-    <footer role="contentinfo" style={{ background: "var(--color-ink)", color: "white", padding: "64px 24px 32px" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 48, marginBottom: 48 }} className="footer-grid">
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-              <div style={{ width: 40, height: 40, background: "var(--color-violet)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ color: "white", fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "0.85rem" }}>MD</span>
+    <footer role="contentinfo" style={{ background: "var(--color-ink)", color: "white", padding: "clamp(48px, 8vw, 64px) clamp(16px, 4vw, 32px) 28px" }}>
+      <div className="section-container">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
+            gap: "clamp(32px, 5vw, 48px)",
+            marginBottom: 40,
+          }}
+        >
+          {/* Identity */}
+          <div style={{ maxWidth: 320 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  background: "var(--color-violet)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <span style={{ color: "white", fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "0.85rem" }}>
+                  MD
+                </span>
               </div>
-              <span style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.1rem" }}>Mariema Diop</span>
+              <span style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.1rem" }}>
+                Mariema Diop
+              </span>
             </div>
-            <p style={{ color: "rgba(255,255,255,0.6)", lineHeight: 1.7, fontSize: "0.9rem", maxWidth: 280 }}>
-              Référente Digitale | Design Graphique & UX/UI<br />Dakar, Sénégal
+            <p style={{ color: "rgba(255,255,255,0.65)", lineHeight: 1.65, fontSize: "0.88rem" }}>
+              Référente Digitale | Design Graphique &amp; UX/UI<br />Dakar, Sénégal
             </p>
-            <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-              {[{ icon: ICONS.linkedin, label: "LinkedIn", href: "#[Ajouter lien LinkedIn]" }, { icon: ICONS.github, label: "GitHub", href: "#[Ajouter lien GitHub]" }, { icon: ICONS.mail, label: "Email", href: "mailto:[Ajouter adresse email]" }].map((s) => (
-                <a key={s.label} href={s.href} aria-label={s.label} style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.7)", textDecoration: "none", transition: "all 0.25s ease" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--color-violet)"; e.currentTarget.style.color = "white"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}>
-                  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={s.icon} /></svg>
-                </a>
-              ))}
-            </div>
           </div>
+
+          {/* Nav links */}
           <div>
-            <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "0.9rem", marginBottom: 16, color: "rgba(255,255,255,0.9)" }}>Navigation</h3>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+            <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "0.92rem", marginBottom: 14, color: "rgba(255,255,255,0.92)" }}>
+              Navigation
+            </h3>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
               {["accueil", "apropos", "competences", "services", "projets", "parcours", "contact"].map((id) => (
                 <li key={id}>
-                  <button onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.55)", fontFamily: "var(--font-body)", fontSize: "0.88rem", padding: 0, textTransform: "capitalize", transition: "color 0.2s" }}
+                  <button
+                    onClick={() => scrollTo(id)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "rgba(255,255,255,0.6)",
+                      fontFamily: "var(--font-body)",
+                      fontSize: "0.86rem",
+                      padding: 0,
+                      textTransform: "capitalize",
+                      transition: "color 0.2s",
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = "white")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}>
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+                  >
                     {id === "apropos" ? "À propos" : id === "competences" ? "Compétences" : id.charAt(0).toUpperCase() + id.slice(1)}
                   </button>
                 </li>
               ))}
             </ul>
           </div>
+
+          {/* Services list */}
           <div>
-            <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "0.9rem", marginBottom: 16, color: "rgba(255,255,255,0.9)" }}>Services</h3>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-              {["Design Graphique", "UX/UI Design", "Prototypage", "Projets digitaux"].map((s) => (
-                <li key={s} style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.88rem" }}>{s}</li>
+            <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "0.92rem", marginBottom: 14, color: "rgba(255,255,255,0.92)" }}>
+              Expertises
+            </h3>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+              {["Design Graphique", "UX/UI Design", "Prototypage interactif", "Conception de projets"].map((s) => (
+                <li key={s} style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.86rem" }}>
+                  {s}
+                </li>
               ))}
             </ul>
           </div>
         </div>
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.82rem" }}>
-            © {year} Mariema Diop — Portfolio personnel. Tous droits réservés.
+
+        {/* Bottom copyright */}
+        <div
+          style={{
+            borderTop: "1px solid rgba(255,255,255,0.12)",
+            paddingTop: 20,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 10,
+          }}
+        >
+          <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.8rem" }}>
+            © {year} Mariema Diop — Tous droits réservés.
           </p>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.82rem" }}>
-            Design Graphique & UX/UI · Dakar, Sénégal
+          <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.8rem" }}>
+            Portfolio Responsive · Dakar, Sénégal
           </p>
         </div>
       </div>
-      <style>{`.footer-grid { grid-template-columns: 2fr 1fr 1fr; } @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr; gap: 32px; } }`}</style>
     </footer>
   );
 }
@@ -836,16 +1799,13 @@ export default function App() {
   useReveal();
 
   useEffect(() => {
-    const handler = () => setShowTop(window.scrollY > 400);
-    window.addEventListener("scroll", handler);
+    const handler = () => setShowTop(window.scrollY > 350);
+    window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
   return (
     <>
-      {/* SEO meta via document title */}
-      <title>Mariema Diop | Référente Digitale & Designer UX/UI</title>
-
       <Navbar active={active} />
       <main id="main-content">
         <Hero />
@@ -859,14 +1819,24 @@ export default function App() {
       </main>
       <Footer />
 
-      {/* Back to top */}
+      {/* Back to top button */}
       <button
         id="back-to-top"
         className={showTop ? "visible" : ""}
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         aria-label="Retour en haut de la page"
       >
-        <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg
+          width={20}
+          height={20}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
           <path d={ICONS.arrowUp} />
         </svg>
       </button>
