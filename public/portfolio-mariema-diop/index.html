@@ -390,9 +390,8 @@
 
           <!-- PROTECTA -->
           <article class="card project-card reveal reveal-d1" data-category="uxui innovation">
-            <div class="project-thumb" style="background:linear-gradient(135deg,#5B3A8C22,#F8D7E3);">
-              <img src="assets/images/protecta.jpg" alt="Aperçu du projet PROTECTA — Application mobile de sécurité"
-                data-placeholder="true" />
+            <div class="project-thumb project-thumb-zoomable" style="background:linear-gradient(135deg,#5B3A8C22,#F8D7E3);" data-hd="assets/images/protecta-hd.jpg" data-title="PROTECTA — Brand Guideline Officiel" data-category="Brand Guideline · UX/UI Design · Sécurité &amp; IA" title="Cliquer pour afficher la planche en plein écran HD">
+              <img src="assets/images/protecta.jpg" alt="Aperçu du projet PROTECTA — Brand Guideline officiel et identité visuelle" style="object-position: center 15%;" />
               <div class="project-thumb-placeholder" style="display:none;" aria-hidden="true">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                   stroke-linecap="round" stroke-linejoin="round">
@@ -400,7 +399,11 @@
                 </svg>
                 <span>[Ajouter aperçu du projet]</span>
               </div>
-              <span class="project-cat-badge">UX/UI · IA</span>
+              <span class="project-cat-badge">Brand Guideline · IA</span>
+              <div class="project-thumb-zoom">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6"/></svg>
+                <span>Agrandir en HD</span>
+              </div>
             </div>
             <div class="project-body">
               <h3 class="project-title">PROTECTA</h3>
@@ -408,17 +411,24 @@
                 femmes, aux jeunes filles et aux enfants. Combine application mobile, dispositifs connectés et
                 intelligence artificielle.</p>
               <div class="project-tools">
+                <span class="tool-tag">Brand Guideline</span>
                 <span class="tool-tag">Figma</span>
                 <span class="tool-tag">Design Thinking</span>
                 <span class="tool-tag">UX/UI</span>
               </div>
-              <a href="#[Ajouter lien du projet]" class="btn btn-primary btn-sm" aria-label="Voir le projet PROTECTA">
-                Voir le projet
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
-                </svg>
-              </a>
+              <div class="project-actions-row">
+                <button type="button" class="btn btn-outline btn-sm open-lightbox-btn" data-hd="assets/images/protecta-hd.jpg" data-title="PROTECTA — Brand Guideline Officiel" data-category="Brand Guideline · UX/UI Design · Sécurité &amp; IA">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6"/></svg>
+                  Aperçu HD
+                </button>
+                <a href="#contact" class="btn btn-primary btn-sm" aria-label="Voir les détails du projet PROTECTA">
+                  Voir les détails
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                  </svg>
+                </a>
+              </div>
             </div>
           </article>
 
@@ -925,6 +935,32 @@
       </div>
     </div>
   </footer>
+
+  <!-- Lightbox HD Modal -->
+  <div id="lightbox-modal" class="lightbox-modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;">
+    <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+    <div class="lightbox-container">
+      <div class="lightbox-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <h3 id="lightbox-title" class="lightbox-title">PROTECTA — Brand Guideline Officiel</h3>
+            <span class="lightbox-badge">Haute Définition 4K</span>
+          </div>
+          <p id="lightbox-desc" class="lightbox-subtitle">Brand Guideline · UX/UI Design · Sécurité &amp; IA</p>
+        </div>
+        <div class="lightbox-actions">
+          <a id="lightbox-raw-link" href="assets/images/protecta-hd.jpg" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">
+            Ouvrir en plein écran
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+          </a>
+          <button id="lightbox-close-btn" class="lightbox-close" aria-label="Fermer la vue grand format">&times;</button>
+        </div>
+      </div>
+      <div class="lightbox-body">
+        <img id="lightbox-img" src="" alt="Aperçu grand format" />
+      </div>
+    </div>
+  </div>
 
   <!-- Bouton retour en haut -->
   <button id="back-to-top" aria-label="Retour en haut de la page" title="Retour en haut">

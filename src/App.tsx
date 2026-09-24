@@ -1,6 +1,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import profilePhoto from "./assets/images/mariema-profile.jpg";
 import protectaImg from "./assets/images/protecta.jpg";
+import protectaHdImg from "./assets/images/protecta-hd.jpg";
 import remaflowImg from "./assets/images/remaflow.jpg";
 import jojDakarImg from "./assets/images/joj-dakar.jpg";
 import jigeenBusinessImg from "./assets/images/jigeen-business.jpg";
@@ -43,6 +44,7 @@ const ICONS = {
   star: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
   check: "M20 6L9 17l-5-5",
   user: "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z",
+  zoom: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6",
 };
 
 /* ─── Reveal hook ─── */
@@ -922,11 +924,12 @@ function Projects() {
       id: "protecta",
       name: "PROTECTA",
       category: "UX/UI Design",
-      categoryFull: "UX/UI Design · Intelligence Artificielle",
+      categoryFull: "Brand Guideline · UX/UI Design · Sécurité & IA",
       description: "Solution digitale sénégalaise de prévention, d'alerte et d'assistance destinée aux femmes, aux jeunes filles et aux enfants. Combine application mobile, dispositifs connectés discrets et IA pour faciliter l'envoi d'alertes.",
-      role: ["Recherche UX", "UX/UI Design", "Maquettes Figma", "Prototypage"],
-      tools: ["Figma", "Design Thinking", "UX/UI"],
+      role: ["Brand Guideline", "Recherche UX", "UX/UI Design", "Maquettes Figma", "Prototypage"],
+      tools: ["Figma", "Brand Guideline", "Design Thinking", "UX/UI"],
       img: protectaImg,
+      hdImg: protectaHdImg,
       color: "#5B3A8C",
     },
     {
@@ -938,6 +941,7 @@ function Projects() {
       role: ["Identité visuelle", "Design d'interface", "Maquettes", "Prototypage"],
       tools: ["Figma", "Branding", "UI Design"],
       img: remaflowImg,
+      hdImg: remaflowImg,
       color: "#7B5AB0",
     },
     {
@@ -949,6 +953,7 @@ function Projects() {
       role: ["Landing Page", "Inscription", "Calendrier", "Profil utilisateur", "Galerie"],
       tools: ["Figma", "UX/UI Design", "Wireframing"],
       img: jojDakarImg,
+      hdImg: jojDakarImg,
       color: "#9B6BC0",
     },
     {
@@ -960,11 +965,35 @@ function Projects() {
       role: ["Concept", "Structuration", "Expérience utilisateur", "Conception d'interfaces"],
       tools: ["Figma", "UX/UI", "Business Model"],
       img: jigeenBusinessImg,
+      hdImg: jigeenBusinessImg,
       color: "#5B3A8C",
     },
   ];
 
   const [filter, setFilter] = useState("Tous");
+  const [lightbox, setLightbox] = useState<{
+    isOpen: boolean;
+    img: string;
+    name: string;
+    category: string;
+    description: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (lightbox?.isOpen) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setLightbox(null);
+      };
+      window.addEventListener("keydown", onKeyDown);
+      return () => {
+        document.body.style.overflow = orig;
+        window.removeEventListener("keydown", onKeyDown);
+      };
+    }
+  }, [lightbox?.isOpen]);
+
   const categoriesList = ["Tous", "UX/UI Design", "Branding", "Innovation"];
 
   const filteredProjects =
@@ -1038,14 +1067,25 @@ function Projects() {
                 flexDirection: "column",
               }}
             >
-              {/* Image banner */}
+              {/* Image banner with click-to-zoom */}
               <div
+                onClick={() =>
+                  setLightbox({
+                    isOpen: true,
+                    img: p.hdImg || p.img,
+                    name: p.name,
+                    category: p.categoryFull || p.category,
+                    description: p.description,
+                  })
+                }
                 style={{
-                  height: "clamp(180px, 25vw, 220px)",
+                  height: "clamp(190px, 26vw, 230px)",
                   background: `linear-gradient(135deg, ${p.color}22, var(--color-blush))`,
                   position: "relative",
                   overflow: "hidden",
+                  cursor: "pointer",
                 }}
+                title="Cliquer pour afficher la planche en plein écran HD"
               >
                 <img
                   src={p.img}
@@ -1054,6 +1094,7 @@ function Projects() {
                     width: "100%",
                     height: "100%",
                     objectFit: "cover",
+                    objectPosition: p.id === "protecta" ? "center 15%" : "center",
                     transition: "transform 0.5s ease",
                   }}
                   onError={(e) => {
@@ -1077,6 +1118,30 @@ function Projects() {
                   }}
                 >
                   {p.category}
+                </div>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 12,
+                    right: 12,
+                    background: "rgba(18, 10, 30, 0.8)",
+                    backdropFilter: "blur(6px)",
+                    color: "white",
+                    borderRadius: 50,
+                    padding: "5px 12px",
+                    fontSize: "0.74rem",
+                    fontFamily: "var(--font-heading)",
+                    fontWeight: 600,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <Icon path={ICONS.zoom} size={13} />
+                  <span>Agrandir en HD</span>
                 </div>
               </div>
 
@@ -1138,23 +1203,206 @@ function Projects() {
                   ))}
                 </div>
 
-                <a
-                  href="#contact"
-                  className="btn-primary"
-                  style={{
-                    fontSize: "0.85rem",
-                    padding: "10px 18px",
-                    minHeight: 40,
-                    alignSelf: "flex-start",
-                  }}
-                >
-                  Voir les détails <Icon path={ICONS.external} size={14} />
-                </a>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLightbox({
+                        isOpen: true,
+                        img: p.hdImg || p.img,
+                        name: p.name,
+                        category: p.categoryFull || p.category,
+                        description: p.description,
+                      })
+                    }
+                    className="btn-outline"
+                    style={{
+                      fontSize: "0.84rem",
+                      padding: "9px 15px",
+                      minHeight: 40,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      borderColor: "var(--color-violet)",
+                      color: "var(--color-violet)",
+                      borderRadius: 50,
+                      background: "white",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                    }}
+                  >
+                    <Icon path={ICONS.zoom} size={14} /> Aperçu HD
+                  </button>
+                  <a
+                    href="#contact"
+                    className="btn-primary"
+                    style={{
+                      fontSize: "0.85rem",
+                      padding: "10px 18px",
+                      minHeight: 40,
+                    }}
+                  >
+                    Voir les détails <Icon path={ICONS.external} size={14} />
+                  </a>
+                </div>
               </div>
             </article>
           ))}
         </div>
       </div>
+
+      {/* Lightbox HD Modal */}
+      {lightbox?.isOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Aperçu grand format — ${lightbox.name}`}
+          onClick={() => setLightbox(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(15, 8, 25, 0.94)",
+            backdropFilter: "blur(12px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "clamp(10px, 3vw, 24px)",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "relative",
+              width: "min(96vw, 1380px)",
+              maxHeight: "94vh",
+              display: "flex",
+              flexDirection: "column",
+              background: "#180e28",
+              border: "1px solid rgba(205, 180, 219, 0.25)",
+              borderRadius: 20,
+              boxShadow: "0 25px 70px rgba(0,0,0,0.7)",
+              overflow: "hidden",
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 22px",
+                borderBottom: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(22, 12, 36, 0.8)",
+                flexWrap: "wrap",
+                gap: 12,
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                  <h3
+                    style={{
+                      fontFamily: "var(--font-heading)",
+                      fontWeight: 700,
+                      fontSize: "1.15rem",
+                      color: "white",
+                      margin: 0,
+                    }}
+                  >
+                    {lightbox.name} — Brand Guideline Officiel
+                  </h3>
+                  <span
+                    style={{
+                      background: "rgba(205, 180, 219, 0.22)",
+                      color: "#E8D3FA",
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      padding: "3px 10px",
+                      borderRadius: 20,
+                      letterSpacing: "0.03em",
+                    }}
+                  >
+                    Haute Résolution 4K
+                  </span>
+                </div>
+                <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.7)", margin: "4px 0 0" }}>
+                  {lightbox.category} · Cliquez pour faire défiler et examiner chaque détail
+                </p>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <a
+                  href={lightbox.img}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    background: "rgba(255,255,255,0.12)",
+                    color: "white",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    padding: "7px 16px",
+                    borderRadius: 50,
+                    fontSize: "0.8rem",
+                    fontWeight: 600,
+                    fontFamily: "var(--font-heading)",
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  Ouvrir l'image originale <Icon path={ICONS.external} size={13} />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setLightbox(null)}
+                  aria-label="Fermer"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    background: "rgba(255,255,255,0.15)",
+                    border: "none",
+                    color: "white",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon path={ICONS.x} size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Image Container with high clarity */}
+            <div
+              style={{
+                flex: 1,
+                overflow: "auto",
+                padding: "clamp(12px, 2vw, 24px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "#0c0614",
+              }}
+            >
+              <img
+                src={lightbox.img}
+                alt={`Planche haute définition ${lightbox.name}`}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "calc(94vh - 120px)",
+                  width: "auto",
+                  height: "auto",
+                  objectFit: "contain",
+                  borderRadius: 8,
+                  boxShadow: "0 10px 40px rgba(0,0,0,0.6)",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

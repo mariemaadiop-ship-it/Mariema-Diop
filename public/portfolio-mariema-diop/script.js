@@ -207,3 +207,54 @@ backToTop.addEventListener('click', () => {
   const el = $('#footer-year');
   if (el) el.textContent = new Date().getFullYear();
 })();
+
+/* =====================================================
+   LIGHTBOX PROJETS (Plein écran HD)
+   ===================================================== */
+(function initLightbox() {
+  const modal = $('#lightbox-modal');
+  if (!modal) return;
+  const backdrop = $('#lightbox-backdrop');
+  const closeBtn = $('#lightbox-close-btn');
+  const imgEl = $('#lightbox-img');
+  const titleEl = $('#lightbox-title');
+  const descEl = $('#lightbox-desc');
+  const rawLink = $('#lightbox-raw-link');
+
+  function openLightbox(hdSrc, title, desc) {
+    imgEl.src = hdSrc;
+    if (titleEl && title) titleEl.textContent = title;
+    if (descEl && desc) descEl.textContent = desc;
+    if (rawLink) rawLink.href = hdSrc;
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+    imgEl.src = '';
+    document.body.style.overflow = '';
+  }
+
+  // Clic sur les miniatures zoomables et boutons d'aperçu
+  $$('.project-thumb-zoomable, .open-lightbox-btn').forEach(trigger => {
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const hdSrc = trigger.dataset.hd || trigger.getAttribute('data-hd');
+      const title = trigger.dataset.title || trigger.getAttribute('data-title');
+      const desc = trigger.dataset.category || trigger.getAttribute('data-category');
+      if (hdSrc) openLightbox(hdSrc, title, desc);
+    });
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+  if (backdrop) backdrop.addEventListener('click', closeLightbox);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      closeLightbox();
+    }
+  });
+})();
