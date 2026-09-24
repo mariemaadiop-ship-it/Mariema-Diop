@@ -3,6 +3,7 @@ import profilePhoto from "./assets/images/mariema-profile.jpg";
 import protectaImg from "./assets/images/protecta.jpg";
 import protectaHdImg from "./assets/images/protecta-hd.jpg";
 import remaflowImg from "./assets/images/remaflow.jpg";
+import remaflowHdImg from "./assets/images/remaflow-hd.jpg";
 import jojDakarImg from "./assets/images/joj-dakar.jpg";
 import jigeenBusinessImg from "./assets/images/jigeen-business.jpg";
 
@@ -936,12 +937,12 @@ function Projects() {
       id: "remaflow",
       name: "REMAFLOW",
       category: "Branding",
-      categoryFull: "E-commerce · Branding · UI Design",
+      categoryFull: "Brand Guidelines · E-commerce · Mode & Accessoires",
       description: "Projet de marque e-commerce dédié à la vente de chaussures, vêtements et accessoires. Identité visuelle moderne et expérience digitale élégante.",
-      role: ["Identité visuelle", "Design d'interface", "Maquettes", "Prototypage"],
-      tools: ["Figma", "Branding", "UI Design"],
+      role: ["Brand Guidelines", "Identité visuelle", "Design d'interface", "Maquettes", "Prototypage"],
+      tools: ["Figma", "Brand Guidelines", "Branding", "UI Design"],
       img: remaflowImg,
-      hdImg: remaflowImg,
+      hdImg: remaflowHdImg,
       color: "#7B5AB0",
     },
     {
@@ -1094,7 +1095,7 @@ function Projects() {
                     width: "100%",
                     height: "100%",
                     objectFit: "cover",
-                    objectPosition: p.id === "protecta" ? "center 15%" : "center",
+                    objectPosition: p.id === "protecta" || p.id === "remaflow" ? "center 15%" : "center",
                     transition: "transform 0.5s ease",
                   }}
                   onError={(e) => {
@@ -1309,7 +1310,7 @@ function Projects() {
                       margin: 0,
                     }}
                   >
-                    {lightbox.name} — Brand Guideline Officiel
+                    {lightbox.name} — Brand Guidelines Officiel
                   </h3>
                   <span
                     style={{
