@@ -1423,12 +1423,12 @@ function Timeline() {
       color: "#FF6200",
     },
     {
-      org: "Université Virtuelle du Sénégal",
-      title: "Parcours académique & apprentissage",
-      type: "Enseignement supérieur",
-      description: "Mon parcours académique m'a permis de développer une grande rigueur, une méthodologie d'apprentissage autonome et une ouverture vers les métiers du digital.",
+      org: "Lycée — jusqu'en Terminale",
+      title: "Parcours scolaire",
+      type: "Formation scolaire",
+      description: "J'ai suivi ma scolarité jusqu'en classe de Terminale. Ce parcours m'a forgé une grande résilience, une capacité d'adaptation et une détermination à continuer d'apprendre en dehors des voies traditionnelles.",
       quote: null,
-      tags: ["Formation continue", "Méthodologie", "Autonomie"],
+      tags: ["Résilience", "Autodidacte", "Détermination"],
       color: "var(--color-violet)",
     },
   ];
