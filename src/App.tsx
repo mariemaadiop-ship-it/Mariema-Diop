@@ -1754,10 +1754,10 @@ function Contact() {
                     Email
                   </p>
                   <a
-                    href="mailto:mariemadiop.pro@gmail.com"
+                    href="mailto:mariemaadiop@gmail.com"
                     style={{ fontSize: "0.85rem", color: "var(--color-violet)", textDecoration: "none" }}
                   >
-                    mariemadiop.pro@gmail.com
+                    mariemaadiop@gmail.com
                   </a>
                 </div>
               </div>
