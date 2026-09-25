@@ -571,7 +571,7 @@ function About() {
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 8 }}>
-                {["Design Graphique", "UX/UI Design", "Maîtrise de Canva", "Gestion de projet", "Prototypage", "Figma"].map((tag) => (
+                {["Design Graphique", "UX/UI Design", "Maîtrise de Canva", "Gestion de projet", "Création de site web", "Audiovisuel", "Prototypage", "Figma"].map((tag) => (
                   <div key={tag} className="skill-badge" style={{ justifyContent: "center", padding: "8px 12px" }}>
                     {tag}
                   </div>
@@ -631,7 +631,7 @@ function About() {
                 Après une première expérience dans un parcours orienté vers l'éducation, j'ai choisi de me tourner vers le numérique afin d'explorer un univers qui correspond davantage à ma créativité et à mon envie d'innover.
               </p>
               <p>
-                Aujourd'hui, grâce à ma formation dans le domaine du digital, j'ai développé de solides compétences en design graphique, maîtrise de Canva, UX/UI Design, ainsi qu'en gestion de projet et conception de solutions numériques.
+                Aujourd'hui, grâce à ma formation dans le domaine du digital, j'ai développé de solides compétences en design graphique, maîtrise de Canva, UX/UI Design, création de site web, production audiovisuelle, ainsi qu'en gestion de projet et conception de solutions numériques.
               </p>
               <p>
                 J'aime particulièrement transformer une idée en une expérience visuelle cohérente, accessible et impactante. Chaque projet représente pour moi une opportunité d'apprendre, de créer et de proposer des solutions adaptées aux besoins des utilisateurs.
@@ -641,7 +641,7 @@ function About() {
               className="reveal reveal-delay-3"
               style={{ marginTop: 24, display: "flex", flexWrap: "wrap", gap: 10 }}
             >
-              {["Design Graphique", "UX/UI Design", "Maîtrise de Canva", "Gestion de projet", "Projets digitaux", "Formation continue"].map((tag) => (
+              {["Design Graphique", "UX/UI Design", "Maîtrise de Canva", "Gestion de projet", "Création de site web", "Audiovisuel", "Projets digitaux", "Formation continue"].map((tag) => (
                 <span key={tag} className="skill-badge">
                   {tag}
                 </span>
@@ -668,6 +668,16 @@ function Skills() {
       title: "UX/UI Design",
       icon: ICONS.layers,
       skills: ["Recherche UX", "Wireframing", "User Flow", "Design d'interfaces", "Prototypage"],
+    },
+    {
+      title: "Création de site web",
+      icon: ICONS.cpu,
+      skills: ["Conception de sites web", "Figma vers HTML/CSS", "Intégration web", "Design responsive", "Vite / React"],
+    },
+    {
+      title: "Audiovisuel",
+      icon: ICONS.star,
+      skills: ["Montage vidéo", "CapCut", "Création de contenus visuels", "Réels & Stories", "Motion & animation"],
     },
     {
       title: "Outils",
