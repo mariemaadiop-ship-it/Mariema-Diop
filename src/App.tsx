@@ -399,7 +399,14 @@ function Hero() {
               >
                 Découvrir mes projets <Icon path={ICONS.arrow} size={18} />
               </button>
-              <a href="#cv-mariema" className="btn-outline" aria-label="Télécharger mon CV">
+              <a
+                href="/CV%20mariema/Mariema%20diop%20CV.pdf"
+                download="Mariema diop CV.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-outline"
+                aria-label="Télécharger mon CV"
+              >
                 <Icon path={ICONS.download} size={18} /> Télécharger mon CV
               </a>
               <button
@@ -814,6 +821,18 @@ function Services() {
       title: "Conception de projets digitaux",
       description: "Accompagnement dans la structuration d'une idée, depuis la réflexion jusqu'à la création d'une solution digitale cohérente.",
       icon: ICONS.cpu,
+    },
+    {
+      num: "05",
+      title: "Création de site web",
+      description: "Conception et intégration de sites web modernes, responsives et esthétiques, de la maquette Figma jusqu'à la mise en ligne.",
+      icon: ICONS.cpu,
+    },
+    {
+      num: "06",
+      title: "Audiovisuel",
+      description: "Production de contenus vidéo engageants : montage, réels, stories et animations pour renforcer votre présence digitale.",
+      icon: ICONS.star,
     },
   ];
 
